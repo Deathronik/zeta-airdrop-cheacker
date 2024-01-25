@@ -12,38 +12,44 @@ function App() {
     const [isLoading, setIsLoading] = useState(false)
 
     const fetchWalletData = async (wallet) => {
-        const response = await fetch(`https://airdrop-router.cl04.zetachain.com/pre-claim-status?address=${wallet}`, {
-            "headers": {
-                "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-                "accept-language": "en-US,en;q=0.9,ru-UA;q=0.8,ru;q=0.7,uk;q=0.6",
-                "cache-control": "max-age=0",
-                "sec-ch-ua": "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"",
-                "sec-ch-ua-mobile": "?0",
-                "sec-ch-ua-platform": "\"Windows\"",
-                "sec-fetch-dest": "document",
-                "sec-fetch-mode": "navigate",
-                "sec-fetch-site": "none",
-                "sec-fetch-user": "?1",
-                "upgrade-insecure-requests": "1"
-            },
-            "body": null,
-            "method": "GET"
-        });
+        try {
+            const response = await fetch(`https://airdrop-router.cl04.zetachain.com/pre-claim-status?address=${wallet}`, {
+                "headers": {
+                    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                    "accept-language": "en-US,en;q=0.9,ru-UA;q=0.8,ru;q=0.7,uk;q=0.6",
+                    "cache-control": "max-age=0",
+                    "sec-ch-ua": "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"",
+                    "sec-ch-ua-mobile": "?0",
+                    "sec-ch-ua-platform": "\"Windows\"",
+                    "sec-fetch-dest": "document",
+                    "sec-fetch-mode": "navigate",
+                    "sec-fetch-site": "none",
+                    "sec-fetch-user": "?1",
+                    "upgrade-insecure-requests": "1"
+                },
+                "body": null,
+                "method": "GET"
+            });
 
-        const json = await response.json()
+            const json = await response.json()
 
-        if (json.userCondition === "Eligible") {
-            return {
-                "wallet": wallet,
-                "amount": json.claimAmount,
-                "eligible": true
+            if (json.userCondition === "Eligible") {
+                return {
+                    "wallet": wallet,
+                    "amount": json.claimAmount,
+                    "eligible": true
+                }
+            } else {
+                return {
+                    "wallet": wallet,
+                    "amount": 0,
+                    "eligible": false
+                }
             }
-        } else {
-            return {
-                "wallet": wallet,
-                "amount": 0,
-                "eligible": false
-            }
+        } catch (e) {
+            console.log(e)
+            await new Promise(r => setTimeout(r, 60000))
+            return await fetchWalletData(wallet)
         }
     }
 
@@ -89,7 +95,9 @@ function App() {
             {results.length !== 0 && (
                 <div>
                     <h5 className="mt-3">Results</h5>
-                    <p className="mt-3"><strong>After check, claim eligible wallets on the <a href="https://hub.zetachain.com/claim" target="_blank" rel="noreferrer">official website</a></strong></p>
+                    <p className="mt-3"><strong>After check, claim eligible wallets on the <a
+                        href="https://hub.zetachain.com/claim" target="_blank" rel="noreferrer">official
+                        website</a></strong></p>
                     <h5 className="mb-3">{`Total: ${total.toFixed(2)} $ZETA`}</h5>
                     <Table striped bordered hover>
                         <thead>
